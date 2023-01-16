@@ -4,7 +4,19 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
+	"sync"
 )
+
+var counter int
+var mutex = &sync.Mutex{}
+
+func incrementCounter(w http.ResponseWriter, r *http.Request) {
+	mutex.Lock()
+	counter++
+	fmt.Fprintf(w, strconv.Itoa(counter))
+	mutex.Unlock()
+}
 
 func main() {
 
@@ -13,6 +25,8 @@ func main() {
 	http.HandleFunc("/hi", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Hi")
 	})
+
+	http.HandleFunc("/increment", incrementCounter)
 
 	port := ":5000"
 	fmt.Println("Server is running on port" + port)
